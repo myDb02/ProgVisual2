@@ -28,7 +28,7 @@ public class Koneksi {
                 System.out.println("Koneksi Berhasil");
             }
         } catch (SQLException ex) {
-            System.out.println("Gagal Terkoneksi");
+            System.out.println("Gagal Terkoneksi YA");
             ex.printStackTrace(); // Tambahkan ini untuk melihat detail kesalahan
         }
         return koneksi;
