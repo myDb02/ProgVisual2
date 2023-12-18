@@ -8,27 +8,149 @@ import java.sql.*;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 /**
  *
  * @author al190
  */
 public class daerah extends javax.swing.JFrame {
     
-    public DefaultTableModel tb;
-    public ResultSet rs;
-    public Statement stat;
     public Connection conn;
-    
+    public Statement stat;
+    public ResultSet rs;
+    public DefaultTableModel tb;
+
     /**
      * Creates new form daerah
      */
-    public daerah() {
-        initComponents();
-        String [] judul = {"No","Kode Daerah","Nama Daerah"};
-        tb = new DefaultTableModel(judul,0);
-        TableDaerah.setModel(tb);
+   public daerah(){
+   initComponents();
+   String [] judul = {"No","Kode Daerah","Nama Daerah"};
+   tb = new DefaultTableModel(judul,0);
+   TableDaerah.setModel(tb);
+   tampildata();
+   lebarkolom();
+   padam();
+   hidup();
+   }
+   
+   
+   public void tampildata(){
+   Koneksi classKoneksi = new Koneksi();
+   int jumlahrow = TableDaerah.getRowCount();
+   for (int i=0; i<jumlahrow; i++){
+       tb.removeRow(0);
+   }
+    try {
+    conn = classKoneksi.getKoneksi();
+    stat = conn.createStatement();
+    rs = stat.executeQuery("SELECT * FROM daerah");
+    int no = 1;
+    while(rs.next()){
+        String [] row = { Integer.toString(no),rs.getString(1),rs.getString(2)};
+        tb.addRow(row);
+        no++;
     }
+}
+    catch (SQLException ex){
+        System.out.print(ex.getMessage());
+    }
+}
 
+   
+   public void lebarkolom() {
+        TableColumn column;
+        TableDaerah.setAutoResizeMode (javax.swing.JTable.AUTO_RESIZE_OFF);
+        column=TableDaerah.getColumnModel().getColumn(0);
+        column.setPreferredWidth (30);
+        column=TableDaerah.getColumnModel().getColumn (1);
+        column.setPreferredWidth (150);
+        column=TableDaerah.getColumnModel().getColumn (2);
+        column.setPreferredWidth (310);
+    }
+        public void padam() {
+        txtKode.setEnabled(false);
+        txtDaerah.setEnabled(false);
+    }
+        public void hidup() {
+        txtKode.setEnabled(true);
+        txtDaerah.setEnabled(true);
+        txtKode.requestFocus();
+    }
+        
+        private void simpan() {
+            Koneksi konek = new Koneksi();
+            if (txtKode.getText().equals("")) { 
+                JOptionPane.showMessageDialog(null, "Kode Daerah tidak boleh kosong");
+                txtKode.requestFocus();
+            }    
+            else if (txtDaerah.getText().equals("")) {
+                JOptionPane.showMessageDialog(null, "Nama Daerah tidak boleh kosong");
+                txtDaerah.requestFocus();
+            } else {
+                try{
+                conn = konek.getKoneksi();
+                stat = conn.createStatement();
+                
+                stat.executeUpdate("INSERT INTO daerah VALUES('"+txtKode.getText()+"," + "'"+txtDaerah.getText()+"')");
+                JOptionPane.showMessageDialog(null, "Data Berhasil Disimpan", "Alert", JOptionPane.INFORMATION_MESSAGE);
+                tampildata();
+            } catch (SQLException ex) { {
+                JOptionPane.showMessageDialog(null, "Data Berhasil Disimpan", "Alert", JOptionPane. INFORMATION_MESSAGE);
+                System.out.print(ex.getMessage());
+            }
+        }
+    }
+}
+        
+        public void Angka (KeyEvent e) {
+            if (Character.isAlphabetic(e.getKeyChar())) {
+            e.consume ();
+            JOptionPane.showMessageDialog(null, "Kode Daerah Wajib Angka", "Peringatan", +JOptionPane. WARNING_MESSAGE);
+        }
+    }
+        
+        public void Huruf (KeyEvent a) {
+            if (Character.isDigit(a.getKeyChar())) {
+            a.consume();
+            JOptionPane.showMessageDialog(null, "Nama Daerah Wajib Huruf", "Peringatan", +JOptionPane.WARNING_MESSAGE);
+        }
+    }
+        
+        public void hapus () {
+            txtKode.setText (null);
+            txtDaerah.setText (null);
+        }
+        
+        public void cariData () {
+            String Kode = txtKode.getText();
+            try {
+            int baris = TableDaerah.getRowCount();
+            for (int i=0; i < baris; i++) { tb.removeRow(0); 
+            }
+            String SQL = "SELECT * FROM daerah WHERE iddaerah = '"+Kode+"'"; 
+            ResultSet rs = stat.executeQuery(SQL);
+            
+            int no = 1;
+            while(rs.next()) {
+                String [] row = { Integer.toString(no), rs.getString(1), rs.getString(2)}; tb.addRow(row);
+                no++;
+            }
+            
+            System.out.println("Berhasil menampilkan pencarian");
+        } catch (SQLException ex) {
+            System.err.print(ex);
+    }
+}
+        
+        public void Cari () {
+            String Kata = txtKode.getText(); System.out.println(Kata);
+            if (Kata !="") {
+            cariData();
+            } else {
+            tampildata();
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -85,6 +207,11 @@ public class daerah extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        TableDaerah.addContainerListener(new java.awt.event.ContainerAdapter() {
+            public void componentAdded(java.awt.event.ContainerEvent evt) {
+                TableDaerahComponentAdded(evt);
+            }
+        });
         jScrollPane2.setViewportView(TableDaerah);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -148,28 +275,15 @@ public class daerah extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        Koneksi konek = new Koneksi();
-        if (txtKode.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "Kode Daerah tidak boleh kosong");
-            txtKode.requestFocus();
-        }
-          else if (txtDaerah.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "Nama Daerah tidak boleh kosong");
-                txtDaerah.requestFocus();
-            } else {
-                try{
-                    conn = konek.getKoneksi();
-                    stat = conn.createStatement();
-                    stat.execute("INSERT INTO daerah VALUES('"+txtKode.getText()+"'," + "'"+txtDaerah.getText()+"')");
-                    
-                    JOptionPane.showMessageDialog(null, "Data Berhasil Disimpan", "Alert", JOptionPane.INFORMATION_MESSAGE);
-                } catch (SQLException ex) {
-                    JOptionPane.showMessageDialog(null, "Data Berhasil Disimpan", "Alert", JOptionPane.INFORMATION_MESSAGE);
-                    
-                    System.out.print(ex.getMessage());
-                }
-            }
+        // TODO add your handling code here:
+        simpan();
     }//GEN-LAST:event_btnSimpanActionPerformed
+
+    private void TableDaerahComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_TableDaerahComponentAdded
+        // TODO add your handling code here:
+        tampildata();
+        lebarkolom();
+    }//GEN-LAST:event_TableDaerahComponentAdded
 
     /**
      * @param args the command line arguments

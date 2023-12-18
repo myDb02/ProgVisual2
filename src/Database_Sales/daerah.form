@@ -154,6 +154,9 @@
               </Table>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="componentAdded" listener="java.awt.event.ContainerListener" parameters="java.awt.event.ContainerEvent" handler="TableDaerahComponentAdded"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
